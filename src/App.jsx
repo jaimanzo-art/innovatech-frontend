@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 function App() {
   const [estadoBackend, setEstadoBackend] = useState(null);
@@ -16,6 +16,11 @@ function App() {
   const obtenerEstadoBackend = async () => {
     try {
       const respuesta = await fetch(`${API_URL}/api/health`);
+
+      if (!respuesta.ok) {
+        throw new Error("No se pudo obtener el estado del Backend");
+      }
+
       const datos = await respuesta.json();
       setEstadoBackend(datos);
     } catch (error) {
@@ -26,6 +31,11 @@ function App() {
   const obtenerProductos = async () => {
     try {
       const respuesta = await fetch(`${API_URL}/api/productos`);
+
+      if (!respuesta.ok) {
+        throw new Error("No se pudieron obtener los productos");
+      }
+
       const datos = await respuesta.json();
       setProductos(datos);
     } catch (error) {
@@ -41,7 +51,7 @@ function App() {
           <h1>Innovatech Chile</h1>
           <p>
             Aplicación Frontend desplegada en Docker, conectada a un Backend
-            con Node.js, Express y MySQL.
+            privado con Node.js, Express y MySQL.
           </p>
         </div>
       </section>
@@ -88,12 +98,13 @@ function App() {
       <section className="tarjeta">
         <h2>Arquitectura implementada</h2>
         <ul>
-          <li>Frontend React servido con Nginx en contenedor Docker.</li>
-          <li>Backend Node.js y Express ejecutado en contenedor Docker.</li>
-          <li>Base de datos MySQL con volumen persistente.</li>
-          <li>Comunicación Frontend → Backend mediante API REST.</li>
-          <li>Despliegue preparado para AWS EC2.</li>
-          <li>Pipeline CI/CD con GitHub Actions y Docker Hub.</li>
+          <li>Frontend React servido con Nginx en una EC2 pública.</li>
+          <li>Backend Node.js y Express ejecutado en una EC2 privada.</li>
+          <li>Base de datos MySQL ejecutada en contenedor Docker.</li>
+          <li>Persistencia de datos mediante volumen Docker.</li>
+          <li>Comunicación Frontend → Backend mediante proxy Nginx.</li>
+          <li>Imágenes publicadas en Docker Hub.</li>
+          <li>Pipeline CI/CD con GitHub Actions en la rama deploy.</li>
         </ul>
       </section>
     </main>
