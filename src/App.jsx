@@ -1,122 +1,103 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [estadoBackend, setEstadoBackend] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    obtenerEstadoBackend();
+    obtenerProductos();
+  }, []);
+
+  const obtenerEstadoBackend = async () => {
+    try {
+      const respuesta = await fetch(`${API_URL}/api/health`);
+      const datos = await respuesta.json();
+      setEstadoBackend(datos);
+    } catch (error) {
+      setError("No se pudo conectar con el Backend");
+    }
+  };
+
+  const obtenerProductos = async () => {
+    try {
+      const respuesta = await fetch(`${API_URL}/api/productos`);
+      const datos = await respuesta.json();
+      setProductos(datos);
+    } catch (error) {
+      setError("No se pudieron cargar los productos desde el Backend");
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <main className="contenedor">
+      <section className="hero">
         <div>
-          <h1>Get started</h1>
+          <p className="etiqueta">Evaluación Parcial N°2 - DevOps</p>
+          <h1>Innovatech Chile</h1>
           <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+            Aplicación Frontend desplegada en Docker, conectada a un Backend
+            con Node.js, Express y MySQL.
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
       </section>
 
-      <div className="ticks"></div>
+      <section className="tarjeta">
+        <h2>Estado del Backend</h2>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        {estadoBackend ? (
+          <div className="estado-ok">
+            <p>
+              <strong>Servicio:</strong> {estadoBackend.servicio}
+            </p>
+            <p>
+              <strong>Estado:</strong> {estadoBackend.estado}
+            </p>
+            <p>
+              <strong>Fecha:</strong> {estadoBackend.fecha}
+            </p>
+          </div>
+        ) : (
+          <p>Consultando estado del Backend...</p>
+        )}
+
+        {error && <p className="error">{error}</p>}
+      </section>
+
+      <section className="tarjeta">
+        <h2>Servicios DevOps desde MySQL</h2>
+
+        <div className="grid">
+          {productos.length > 0 ? (
+            productos.map((producto) => (
+              <article className="producto" key={producto.id}>
+                <h3>{producto.nombre}</h3>
+                <p>{producto.descripcion}</p>
+              </article>
+            ))
+          ) : (
+            <p>Cargando servicios desde el Backend...</p>
+          )}
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <section className="tarjeta">
+        <h2>Arquitectura implementada</h2>
+        <ul>
+          <li>Frontend React servido con Nginx en contenedor Docker.</li>
+          <li>Backend Node.js y Express ejecutado en contenedor Docker.</li>
+          <li>Base de datos MySQL con volumen persistente.</li>
+          <li>Comunicación Frontend → Backend mediante API REST.</li>
+          <li>Despliegue preparado para AWS EC2.</li>
+          <li>Pipeline CI/CD con GitHub Actions y Docker Hub.</li>
+        </ul>
+      </section>
+    </main>
+  );
 }
 
-export default App
+export default App;
